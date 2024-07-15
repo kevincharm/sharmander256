@@ -1,9 +1,11 @@
 {
   "name": "@kevincharm/sharmander256",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Toy SHA-256 hash function implementation",
   "main": "./dist/sha256.js",
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "engines": {
     "node": ">=18"
   },
