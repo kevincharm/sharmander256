@@ -1,0 +1,53 @@
+name: Run tests on big-endian arch (s390x)
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: yarn
+
+      # NB: This speeds up the build, but should only work for pure JS projects (no native modules)
+      - name: Install deps & build
+        run: |
+          yarn install --frozen-lockfile
+          yarn tsc
+
+      - name: Setup multiarch/qemu-user-static
+        run: |
+          docker run --rm --privileged multiarch/qemu-user-static:register --reset
+
+      - name: Display qemu specified architecture (s390x - big endian)
+        uses: docker://multiarch/ubuntu-core:s390x-focal
+        with:
+          args: >
+            bash -c
+            "uname -a &&
+            lscpu | grep Endian &&
+            ls -la
+            "
+
+      - name: Configure and compile using qemu for the specified architecture (s390x - big endian)
+        uses: docker://multiarch/ubuntu-core:s390x-focal
+        with:
+          args: >
+            bash -c
+            "apt-get update -y &&
+            apt-get install -y curl &&
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash &&
+            export NVM_DIR=\"$HOME/.nvm\" &&
+            [ -s \"$NVM_DIR/nvm.sh\" ] && \. \"$NVM_DIR/nvm.sh\" &&
+            nvm install 18 &&
+            nvm use 18 &&
+            npm run test
+            "

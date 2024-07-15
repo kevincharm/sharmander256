@@ -1,0 +1,27 @@
+name: Run tests
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: yarn
+
+      - name: Install deps & build
+        run: |
+          yarn install --frozen-lockfile
+          yarn tsc
+
+      - name: Run tests
+        run: |
+          yarn test
